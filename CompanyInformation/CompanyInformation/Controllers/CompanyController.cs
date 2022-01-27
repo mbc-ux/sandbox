@@ -1,8 +1,7 @@
 ﻿using CompanyInformation.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyInformation
 {
@@ -29,18 +28,39 @@ namespace CompanyInformation
         [HttpGet("{companyId}")]
         public Company Get(int companyId)
         {
-            return _context.Companies.Find(companyId);
+            return _context.Companies.Include(nameof(Company.Employees))
+                                     .FirstOrDefault(c => c.Id == companyId);
         }
 
-        // GET api/<CompanyController>/5
+        // GET api/<CompanyController>/5/Employees/1234
         [HttpGet("{companyId}/Employees/{employeeNumber}")]
         public Employee Get(int companyId, string employeeNumber)
         {
-            foreach(Employee employee in _context.Companies.Find(companyId)?.Employees)
+            var record = _context.Employees.Find(employeeNumber, companyId);
+            if (record == null)
+                return null;
+            var employee = GetEmployee(record);
+            do
             {
-                if (employee.EmployeeNumber == employeeNumber) return employee;
-            }
-            return null;
+                var currentManagerEmployeeNumber = record.ManagerEmployeeNumber;
+                record = _context.Employees.Find(currentManagerEmployeeNumber);
+                if (record == null) continue;
+                employee.Managers.Add(GetEmployee(record));
+            } while (record != null);
+            return employee;
+        }
+
+        private Employee GetEmployee(EmployeeHeader record)
+        {
+            return new Employee
+            {
+                CompanyId = record.CompanyId,
+                EmployeeNumber = record.EmployeeNumber,
+                Email = record.Email,
+                Department = record.Department,
+                FullName = record.FullName,
+                HireDate = record.HireDate
+            };
         }
     }
 }

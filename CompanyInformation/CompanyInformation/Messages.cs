@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyInformation
 {
@@ -8,7 +9,7 @@ namespace CompanyInformation
         /// CompanyId
         /// </summary>
         [Key]
-        public string Id { get; set; }
+        public int Id { get; set; }
         /// <summary>
         /// CompanyCode
         /// </summary>
@@ -28,12 +29,32 @@ namespace CompanyInformation
         /// <summary>
         /// EmployeeNumber
         /// </summary>
-        [Key]
         public string EmployeeNumber { get; set; }
         /// <summary>
         /// "{EmployeeFirstName} {EmployeeLastName}"
         /// </summary>
         public string FullName { get; set; }
+        /// <summary>
+        /// EmployeeEmail
+        /// </summary>
+        public string Email { get; set; }
+        /// <summary>
+        /// Department
+        /// </summary>
+        public string Department { get; set; }
+        /// <summary>
+        /// HireDate
+        /// </summary>
+        public DateTime? HireDate { get; set; }
+        /// <summary>
+        /// The EmployeeNumber of the manager
+        /// </summary>
+        [ForeignKey(nameof(ManagerEmployeeNumber))]
+        public string? ManagerEmployeeNumber { get; set; }
+        /// <summary>
+        /// The Company that the employee is associated with.
+        /// </summary>
+        public int CompanyId { get; set; }
     }
 
     public class Company : CompanyHeader
@@ -54,18 +75,7 @@ namespace CompanyInformation
         {
             Managers = new List<EmployeeHeader>();
         }
-        /// <summary>
-        /// EmployeeEmail
-        /// </summary>
-        public string Email { get; set; }
-        /// <summary>
-        /// Department
-        /// </summary>
-        public string Department { get; set; }
-        /// <summary>
-        /// HireDate
-        /// </summary>
-        public DateTime HireDate { get; set; }
+
         /// <summary>
         /// List of EmployeeHeaders of the managers ordered ascending by seniority (i.e. the immediate manager first)
         /// </summary>
